@@ -10,6 +10,7 @@ import HireConsult from '../components/HireConsult';
 export default function Home() {
   return (
     <>
+     {/* Render the components in the desired order */}
       <Hero />
       <Stats />
       <Skills />
