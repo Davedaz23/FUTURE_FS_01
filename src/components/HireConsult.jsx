@@ -230,7 +230,7 @@ export default function HireConsult() {
     setFormStatus({ submitting: true, submitted: false, error: null, successMessage: null });
     
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(`${API_URL}/api/consultation/submit`, {
         method: 'POST',
         headers: {
