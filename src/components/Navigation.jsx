@@ -8,7 +8,7 @@ export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
