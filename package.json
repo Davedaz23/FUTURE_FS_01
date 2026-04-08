@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "npm run build"
+  },
+  "engines": {
+    "node": "20.x",
+    "npm": "10.x"
   },
   "dependencies": {
     "@emailjs/browser": "^3.11.0",
