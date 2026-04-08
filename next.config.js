@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost', 'your-domain.com'],
+    domains: ['localhost', 'https://backend-kc92.onrender.com'],
     formats: ['image/avif', 'image/webp'],
   },
   compress: true,
