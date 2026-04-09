@@ -1,20 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Code, Home, User, Briefcase, FolderGit2, Mail, Award, Calendar } from 'lucide-react';
+import { Menu, X, Code, Home, User, Briefcase, FolderGit2, Mail, Award, Calendar, BookOpen, ChevronDown } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const dropdownRef = useRef(null);
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
       
-      // Update active section based on scroll position
-      const sections = ['home', 'skills', 'experience', 'projects', 'hire-consult', 'contact'];
+      const sections = ['home', 'about', 'skills', 'experience', 'projects', 'blog', 'hire-consult', 'contact'];
       const scrollPosition = window.scrollY + 100;
       
       for (const section of sections) {
@@ -29,15 +31,44 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
       }
     };
     
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpenDropdown(null);
+      }
+    };
+    
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
-  const navItems = [
+  // Main navigation items (condensed)
+  const mainNavItems = [
     { name: 'Home', href: '#home', icon: Home, id: 'home' },
+    { name: 'About', href: '#about', icon: User, id: 'about' },
+    { name: 'Skills', href: '#skills', icon: Code, id: 'skills' },
+    { name: 'Projects', href: '#projects', icon: FolderGit2, id: 'projects' },
+    { name: 'Contact', href: '#contact', icon: Mail, id: 'contact' },
+  ];
+
+  // Dropdown items (Experience, Blog, Hire/Consult)
+  const dropdownItems = [
+    { name: 'Experience', href: '#experience', icon: Briefcase, id: 'experience' },
+    { name: 'Blog', href: '#blog', icon: BookOpen, id: 'blog' },
+    { name: 'Hire/Consult', href: '#hire-consult', icon: Calendar, id: 'hire-consult' },
+  ];
+
+  // Mobile navigation items (all items)
+  const mobileNavItems = [
+    { name: 'Home', href: '#home', icon: Home, id: 'home' },
+    { name: 'About', href: '#about', icon: User, id: 'about' },
     { name: 'Skills', href: '#skills', icon: Code, id: 'skills' },
     { name: 'Experience', href: '#experience', icon: Briefcase, id: 'experience' },
     { name: 'Projects', href: '#projects', icon: FolderGit2, id: 'projects' },
+    { name: 'Blog', href: '#blog', icon: BookOpen, id: 'blog' },
     { name: 'Hire/Consult', href: '#hire-consult', icon: Calendar, id: 'hire-consult' },
     { name: 'Contact', href: '#contact', icon: Mail, id: 'contact' },
   ];
@@ -48,7 +79,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
       setMobileMenuOpen(false);
+      setOpenDropdown(null);
     }
+  };
+
+  const isDropdownItemActive = () => {
+    return dropdownItems.some(item => activeSection === item.id);
   };
 
   return (
@@ -89,7 +125,8 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
+              {/* Main Navigation Items */}
+              {mainNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeSection === item.id;
                 
@@ -109,7 +146,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
                     <Icon className="w-4 h-4" />
                     <span className="font-medium">{item.name}</span>
                     
-                    {/* Active Indicator - Cyan */}
                     {isActive && (
                       <motion.div
                         layoutId="activeNav"
@@ -118,7 +154,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
                       />
                     )}
                     
-                    {/* Hover Effect */}
                     {!isActive && (
                       <motion.div
                         className="absolute inset-0 bg-white/5 rounded-lg -z-10"
@@ -130,6 +165,71 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
                   </motion.a>
                 );
               })}
+
+              {/* Dropdown Menu */}
+              <div className="relative" ref={dropdownRef}>
+                <motion.button
+                  onClick={() => setOpenDropdown(openDropdown === 'more' ? null : 'more')}
+                  className={`relative px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${
+                    isDropdownItemActive()
+                      ? 'text-cyan-400'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${openDropdown === 'more' ? 'rotate-180' : ''}`} />
+                  <span className="font-medium">More</span>
+                  
+                  {isDropdownItemActive() && (
+                    <motion.div
+                      layoutId="activeNav"
+                      className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 rounded-lg -z-10 border border-cyan-500/30"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </motion.button>
+
+                {/* Dropdown Content */}
+                <AnimatePresence>
+                  {openDropdown === 'more' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-0 mt-2 w-56 bg-[#0F172A] backdrop-blur-xl rounded-xl shadow-2xl border border-cyan-500/20 overflow-hidden z-50"
+                    >
+                      {dropdownItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeSection === item.id;
+                        
+                        return (
+                          <motion.a
+                            key={item.name}
+                            href={item.href}
+                            onClick={(e) => handleNavClick(e, item.href)}
+                            className={`flex items-center gap-3 px-4 py-3 transition-all duration-300 ${
+                              isActive
+                                ? 'bg-gradient-to-r from-cyan-500/20 to-blue-600/20 text-cyan-400'
+                                : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                            }`}
+                            whileHover={{ x: 5 }}
+                          >
+                            <Icon className="w-4 h-4" />
+                            <span className="font-medium">{item.name}</span>
+                            {isActive && (
+                              <div className="ml-auto w-1 h-4 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full" />
+                            )}
+                          </motion.a>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <ThemeToggle />
               
               {/* Resume Button - Red Accent */}
               <motion.a
@@ -145,17 +245,20 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
             </div>
 
             {/* Mobile Menu Button */}
-            <motion.button
-              className="md:hidden p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-cyan-500/30 shadow-sm"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              whileTap={{ scale: 0.95 }}
-            >
-              {mobileMenuOpen ? (
-                <X className="w-6 h-6 text-cyan-400" />
-              ) : (
-                <Menu className="w-6 h-6 text-cyan-400" />
-              )}
-            </motion.button>
+            <div className="flex items-center gap-2 md:hidden">
+              <ThemeToggle />
+              <motion.button
+                className="p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-cyan-500/30 shadow-sm"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                whileTap={{ scale: 0.95 }}
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-6 h-6 text-cyan-400" />
+                ) : (
+                  <Menu className="w-6 h-6 text-cyan-400" />
+                )}
+              </motion.button>
+            </div>
           </div>
         </div>
       </motion.nav>
@@ -173,7 +276,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
               className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 md:hidden"
             />
             
-            {/* Menu Panel - Dark Theme */}
+            {/* Menu Panel */}
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
@@ -201,7 +304,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
                   </button>
                 </div>
                 
-                {/* Senior Stats - Dark Cards */}
+                {/* Stats */}
                 <div className="grid grid-cols-3 gap-2 mt-4">
                   {[
                     { value: "9+", label: "Years" },
@@ -216,9 +319,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
                 </div>
               </div>
               
-              {/* Navigation Items */}
-              <div className="p-6 space-y-2">
-                {navItems.map((item) => {
+              {/* Navigation Items - Full list for mobile */}
+              <div className="p-6 space-y-2 overflow-y-auto max-h-[calc(100vh-200px)]">
+                {mobileNavItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeSection === item.id;
                   
@@ -246,7 +349,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
                   );
                 })}
                 
-                {/* Mobile Resume Button - Red Accent */}
+                {/* Mobile Resume Button */}
                 <motion.a
                   href="/resume.pdf"
                   target="_blank"
@@ -258,7 +361,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
                 </motion.a>
               </div>
               
-              {/* Social Links - Dark Theme */}
+              {/* Social Links */}
               <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-cyan-500/20 bg-black/30 backdrop-blur-sm">
                 <div className="flex justify-center gap-4">
                   {[
